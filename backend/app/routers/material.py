@@ -12,8 +12,8 @@ router = APIRouter(prefix="/api/material", tags=["养护材料"])
 
 service = MaterialService()
 
-LIST_FIELDS = ["材料编号", "材料名称", "规格型号", "结存数量", "计量单位", "存放场地", "保管人员", "材料状态"]
-STATUSES = ["正常可用", "临近不足", "已冻结", "已耗尽"]
+LIST_FIELDS = ["材料编号", "材料名称", "规格型号", "结存数量", "占用数量", "可用数量", "计量单位", "存放场地", "保管人员", "材料状态"]
+STATUSES = ["正常可用", "应急占用", "临近不足", "已冻结", "已耗尽"]
 
 
 @router.get("", response_model=PageResult[dict])

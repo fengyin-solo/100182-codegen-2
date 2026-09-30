@@ -7,9 +7,21 @@ from app.store import store
 
 MODULE = "material"
 REQUIRED_FIELDS = ["材料编号", "材料名称", "规格型号"]
-STATUS_ORDER = ["正常可用", "临近不足", "已冻结", "已耗尽"]
+STATUS_ORDER = ["正常可用", "应急占用", "临近不足", "已冻结", "已耗尽"]
 ACTION_RULES = {"冻结材料": "已冻结", "解冻材料": "正常可用", "登记耗尽": "已耗尽"}
 NEGATIVE_ACTIONS = []
+
+
+def _with_available(row: dict[str, Any]) -> dict[str, Any]:
+    """应急调度会占用库存，台账上同时展示结存、占用与可用数量。"""
+    total = row.get("结存数量")
+    occupied = row.get("占用数量", 0)
+    try:
+        available = float(total) - float(occupied)
+        row["可用数量"] = int(available) if available.is_integer() else available
+    except (TypeError, ValueError):
+        row["可用数量"] = total
+    return row
 
 
 class MaterialService:
@@ -28,10 +40,12 @@ class MaterialService:
             rows = [row for row in rows if row.get("status") == status]
         total = len(rows)
         start = max(page - 1, 0) * size
-        return rows[start:start + size], total
+        page_rows = [_with_available(dict(row)) for row in rows[start:start + size]]
+        return page_rows, total
 
     def get_entry(self, entry_id: int) -> dict[str, Any] | None:
-        return store.find(MODULE, entry_id)
+        entry = store.find(MODULE, entry_id)
+        return _with_available(dict(entry)) if entry is not None else None
 
     def create_entry(self, values: dict[str, Any]) -> tuple[dict[str, Any] | None, list[str]]:
         missing = [field for field in REQUIRED_FIELDS if not str(values.get(field) or "").strip()]
@@ -53,6 +67,9 @@ class MaterialService:
         if action not in ACTION_RULES:
             return None, f"动作「{action}」不属于养护材料可执行范围"
         target = ACTION_RULES[action]
+        # 应急占用中的物资由防汛调度台账统一归还，不能在材料台账上直接改状态
+        if entry.get("status") == "应急占用" and target != "正常可用":
+            return None, "该物资正被防汛应急调度占用，解除对应汛情后再做状态变更"
         if target not in STATUS_ORDER:
             return None, f"目标状态「{target}」不在允许的状态序列里"
         entry["status"] = target

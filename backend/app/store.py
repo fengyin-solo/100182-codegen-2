@@ -28,8 +28,13 @@ class Store:
         return None
 
     def overview(self) -> dict[str, object]:
+        # flood_event / flood_pump 是防汛调度的内部台账，由防汛看板单独汇总，
+        # 不混进通用业务模块计数。
+        hidden = {"flood_event", "flood_pump"}
         modules: list[dict[str, object]] = []
         for name in self.module_names():
+            if name in hidden:
+                continue
             rows = self.rows(name)
             modules.append({
                 "name": name,

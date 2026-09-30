@@ -28,6 +28,52 @@ class EntryPayload(BaseModel):
     remark: str | None = None
 
 
+class FloodAllocation(BaseModel):
+    """一次泵车/物资调度条目：资源台账ID + 调度数量。"""
+
+    材料ID: int
+    数量: int = 0
+
+
+class FloodWarningPayload(BaseModel):
+    """发布汛情预警时提交的字段。"""
+
+    汛情名称: str
+    预警等级: str
+    影响范围: str
+    值班人员: str | None = None
+    说明: str | None = None
+
+
+class FloodResponsePayload(BaseModel):
+    """启动应急响应时登记：响应等级、影响范围与调度的泵车、物资数量。"""
+
+    响应等级: str
+    影响范围: str
+    值班人员: str | None = None
+    说明: str | None = None
+    泵车调度: list[FloodAllocation] = Field(default_factory=list)
+    物资调度: list[FloodAllocation] = Field(default_factory=list)
+
+
+class FloodAdjustPayload(BaseModel):
+    """响应等级调整；可在提级/降级时追加调度泵车、物资。"""
+
+    响应等级: str
+    影响范围: str | None = None
+    值班人员: str | None = None
+    说明: str | None = None
+    泵车调度: list[FloodAllocation] = Field(default_factory=list)
+    物资调度: list[FloodAllocation] = Field(default_factory=list)
+
+
+class FloodLiftPayload(BaseModel):
+    """解除汛情时的登记信息。"""
+
+    值班人员: str | None = None
+    说明: str | None = None
+
+
 
 class PipeEntry(BaseModel):
     """管段明细结构。"""

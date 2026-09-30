@@ -12,7 +12,7 @@
     </header>
 
     <div class="stat-row">
-      <article v-for="item in stats" :key="item.label" class="stat-card">
+      <article v-for="item in computedStats" :key="item.label" class="stat-card">
         <span class="stat-label">{{ item.label }}</span>
         <strong class="stat-value">{{ item.value }}</strong>
       </article>
@@ -63,23 +63,38 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 
 import { request } from '@/api/client'
 
 type Row = Record<string, string | number | null>
 
 const ENDPOINT = '/api/material'
-const columns = ["材料编号", "材料名称", "规格型号", "结存数量", "计量单位", "存放场地", "保管人员", "材料状态"]
+const columns = ["材料编号", "材料名称", "规格型号", "结存数量", "占用数量", "可用数量", "计量单位", "存放场地", "保管人员", "材料状态"]
 const actions = ["冻结材料", "解冻材料", "登记耗尽"]
-const statuses = ["正常可用", "临近不足", "已冻结", "已耗尽"]
-const stats = [{"label": "可用材料", "value": 0}, {"label": "储备不足材料", "value": 0}, {"label": "已冻结材料", "value": 0}]
+const statuses = ["正常可用", "应急占用", "临近不足", "已冻结", "已耗尽"]
 
 const rows = ref<Row[]>([])
 const total = ref(0)
 const errorMessage = ref('')
 const filters = ref<Record<string, string>>({})
 const filterFields = columns.slice(0, 3)
+
+// 汇总卡片与台账取同一份列表数据：可用数量由后端按「结存-占用」实时算出
+const computedStats = computed(() => {
+  const asNumber = (row: Row, key: string) => Number(row[key] ?? 0)
+  const occupied = rows.value.filter((row) => row.status === '应急占用').length
+  const short = rows.value.filter((row) => row.status === '临近不足').length
+  const frozen = rows.value.filter((row) => row.status === '已冻结').length
+  const lowStock = rows.value.filter((row) => asNumber(row, '可用数量') <= 0).length
+  return [
+    { label: "物资种类", value: rows.value.length },
+    { label: "应急占用种类", value: occupied },
+    { label: "可用数量为零", value: lowStock },
+    { label: "临近不足", value: short },
+    { label: "已冻结材料", value: frozen },
+  ]
+})
 
 function resetFilters() {
   filters.value = {}

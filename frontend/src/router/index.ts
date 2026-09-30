@@ -19,6 +19,8 @@ const Traffic = () => import('@/views/traffic/index.vue')
 const Complaint = () => import('@/views/complaint/index.vue')
 const Fund = () => import('@/views/fund/index.vue')
 const Archive = () => import('@/views/archive/index.vue')
+const Duty = () => import('@/views/duty/index.vue')
+const Flood = () => import('@/views/flood/index.vue')
 
 const router = createRouter({
   history: createWebHistory(),
@@ -38,6 +40,8 @@ const router = createRouter({
     { path: '/dredge', name: 'dredge', component: Dredge },
     { path: '/material', name: 'material', component: Material },
     { path: '/equip', name: 'equip', component: Equip },
+    { path: '/duty', name: 'duty', component: Duty },
+    { path: '/flood', name: 'flood', component: Flood },
     { path: '/traffic', name: 'traffic', component: Traffic },
     { path: '/complaint', name: 'complaint', component: Complaint },
     { path: '/fund', name: 'fund', component: Fund },
