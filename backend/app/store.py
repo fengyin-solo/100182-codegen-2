@@ -8,6 +8,30 @@ from typing import Any
 
 from app.seed import SEED_ROWS
 
+# 运营概览里模块名默认显示表名，这里给出业务中文名，缺失时回落到表名。
+MODULE_LABELS = {
+    "pipe": "管段档案",
+    "manhole": "检查井",
+    "valve": "阀门井室",
+    "pumpstation": "泵站设施",
+    "patrol": "巡查任务",
+    "defect": "缺陷登记",
+    "cctv": "内窥检测",
+    "repair": "修复施工",
+    "pressure": "压力监测",
+    "flow": "流量监测",
+    "leak": "泄漏排查",
+    "dredge": "清淤疏浚",
+    "material": "养护材料",
+    "equip": "养护机械",
+    "traffic": "占道许可",
+    "complaint": "公众诉求",
+    "fund": "养护资金",
+    "archive": "管网档案",
+    "flood": "防汛调度",
+    "pump_truck": "排涝泵车",
+}
+
 
 class Store:
     def __init__(self) -> None:
@@ -33,6 +57,7 @@ class Store:
             rows = self.rows(name)
             modules.append({
                 "name": name,
+                "label": MODULE_LABELS.get(name, name),
                 "created": len(rows),
                 "pending": sum(1 for row in rows if row.get("pending")),
                 "abnormal": sum(1 for row in rows if row.get("abnormal")),

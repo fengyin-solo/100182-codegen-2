@@ -70,7 +70,7 @@ import { request } from '@/api/client'
 type Row = Record<string, string | number | null>
 
 const ENDPOINT = '/api/material'
-const columns = ["材料编号", "材料名称", "规格型号", "结存数量", "计量单位", "存放场地", "保管人员", "材料状态"]
+const columns = ["材料编号", "材料名称", "规格型号", "结存数量", "可用数量", "计量单位", "存放场地", "保管人员", "材料状态"]
 const actions = ["冻结材料", "解冻材料", "登记耗尽"]
 const statuses = ["正常可用", "临近不足", "已冻结", "已耗尽"]
 const stats = [{"label": "可用材料", "value": 0}, {"label": "储备不足材料", "value": 0}, {"label": "已冻结材料", "value": 0}]
